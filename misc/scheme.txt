@@ -25,3 +25,13 @@ account :{
 	 wallet_amount [ defult is 0 ]
 
 }
+
+transaction_record :{
+
+	transaction_id 	(generate using md5 using target phone , account id , server request time);
+~	account_id 	
+~	amount 	
+~	target_phone
+~   target_operator  (1 is mpt,2 is ooredoo,3 is telenor,4 is mytel);	
+	datetime 
+}

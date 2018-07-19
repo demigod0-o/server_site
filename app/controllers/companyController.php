@@ -2,17 +2,15 @@
 
 namespace app\controllers;
 
-use app\models\Company;
+use app\models\CompanyLogin;
+use app\models\CompanyRegister;
+use app\models\CompanyTransaction;
 
 class companyController extends controller {
 
-	function index($request, $response, $args) {
-
-	}
-
 	function register($request, $response) {
 
-		$company = new Company($request->getParsedBody(), $this->c->db);
+		$company = new CompanyRegister($request->getParsedBody(), $this->c->db);
 
 		if ($company->save()) {
 
@@ -38,7 +36,7 @@ class companyController extends controller {
 
 	function login($request, $response) {
 
-		$company = new Company($request->getParsedBody(), $this->c->db);
+		$company = new CompanyLogin($request->getParsedBody(), $this->c->db);
 
 		if ($company->loginCredential()) {
 
@@ -63,15 +61,27 @@ class companyController extends controller {
 	}
 
 	/* This transation method is used for transfer money from company */
-	function transation($request, $response) {
+	function transaction($request, $response) {
 
-		$company = new Company($request->getParsedBody(), $this->c->db);
+		$company = new CompanyTransaction($request->getParsedBody(), $this->c->db);
 
 		if ($company->makeTransation()) {
-			echo "transation success";
+
+			$this->response_message = [
+				'message' => 'transaction success',
+				'error' => false,
+			];
+			$this->status_code = 201;
+
 		} else {
-			echo "transation failed";
+			$this->response_message = [
+				'message' => 'transaction failed',
+				'error' => false,
+			];
+			$this->status_code = 406;
 		}
+
+		return $response->withJson($this->response_message, $this->status_code);
 	}
 
 }
