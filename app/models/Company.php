@@ -7,88 +7,123 @@ use PDO;
 class Company {
 
 	public $errors = [];
+	private $db;
 
-	function __construct($data) {
+	public $access_token;
+
+	function __construct($data, $db) {
+
+		$this->db = $db;
+
 		foreach ($data as $key => $value) {
 			$this->$key = $value;
 		};
+
 	}
 
 	function validate() {
 
-		if ($this->name == '') {
-			$this->errors[] = 'name is require';
+		if (
+			$this->company_name != '' and $this->agent_name != '' and
+			$this->agent_nrc != '' and $this->agent_address != '' and
+			$this->company_address != '' and $this->phone != '' and
+			$this->company_email != '' and $this->agent_email != '' and
+			$this->password != '') {
+
+			if (filter_var($this->company_email, FILTER_VALIDATE_EMAIL) === false) {
+				$this->errors[] = 'company email is invalid !';
+			}
+			if (filter_var($this->agent_email, FILTER_VALIDATE_EMAIL) === false) {
+				$this->errors[] = 'agent email is invalid !';
+			}
+
+		} else {
+
+			$this->errors[] = 'require fields are missing';
+
 		}
-
-		if ($this->agent_name == '') {
-			$this->errors[] = 'agent name is require';
-		}
-
-		if ($this->phone == '') {
-			$this->errors[] = 'phone no is require';
-		}
-
-		if ($this->address == '') {
-			$this->errors[] = 'address is require';
-		}
-
-		if ($this->nrc == '') {
-			$this->errors[] = 'nrc is require';
-		}
-
-		if (filter_var($this->email, FILTER_VALIDATE_EMAIL) === false) {
-			$this->errors[] = 'invalid email';
-		}
-
-		if ($this->password == '') {
-			$this->errors[] = 'Password is require';
-		}
-
-		// if (strlen($this->password) < 6) {
-		//     $this->errors[] = 'Please enter at least 6 characters for the password';
-		// }
-
-		// if (preg_match('/.*[a-z]+.*/i', $this->password) == 0) {
-		//     $this->errors[] = 'Password needs at least one letter';
-		// }
-
-		// if (preg_match('/.*\d+.*/i', $this->password) == 0) {
-		//     $this->errors[] = 'Password needs at least one number';
-		// }
 
 	}
 
-	public function save($db) {
+	public function save() {
+
 		$this->validate();
 
 		if (empty($this->errors)) {
 
-			$password_hash = password_hash($this->password, PASSWORD_DEFAULT);
+			$encript_password = password_hash($this->password, PASSWORD_DEFAULT);
 
 			$this->id = md5($this->phone);
 
-			$dat = date('d/m/Y');
-
 			$sql =
-				'INSERT INTO company ( id, name, agent_name, nrc, phone, email, password, address, date)
-             VALUES (:id, :name, :agent_name, :nrc, :phone, :email, :password , :address , :dat)';
+				'INSERT INTO company
+				( id, company_name, agent_name,
+				  agent_nrc, agent_address,
+				  company_address, phone,
+				  company_email, agent_email,
+				  password )
+             	VALUES
+             	( :id, :company_name, :agent_name,
+				  :agent_nrc, :agent_address,
+				  :company_address, :phone,
+				  :company_email, :agent_email,
+				  :password )';
 
-			$stmt = $db->prepare($sql);
+			$stmt = $this->db->prepare($sql);
 
 			$stmt->bindValue(':id', $this->id, PDO::PARAM_STR);
-			$stmt->bindValue(':name', $this->name, PDO::PARAM_STR);
-			$stmt->bindValue(':agent_name', $this->agent_name, PDO::PARAM_STR);
-			$stmt->bindValue(':nrc', $this->nrc, PDO::PARAM_STR);
-			$stmt->bindValue(':phone', $this->phone, PDO::PARAM_STR);
-			$stmt->bindValue(':email', $this->email, PDO::PARAM_STR);
-			$stmt->bindValue(':password', $password_hash, PDO::PARAM_STR);
-			$stmt->bindValue(':address', $this->address, PDO::PARAM_STR);
-			$stmt->bindValue(':dat', $dat, PDO::PARAM_STR);
 
-			return $stmt->execute();
+			$stmt->bindValue(':company_name', $this->company_name, PDO::PARAM_STR);
+
+			$stmt->bindValue(':agent_name', $this->agent_name, PDO::PARAM_STR);
+
+			$stmt->bindValue(':agent_nrc', $this->agent_nrc, PDO::PARAM_STR);
+
+			$stmt->bindValue(':agent_address', $this->agent_address, PDO::PARAM_STR);
+
+			$stmt->bindValue(':company_address', $this->company_address, PDO::PARAM_STR);
+
+			$stmt->bindValue(':phone', $this->phone, PDO::PARAM_STR);
+
+			$stmt->bindValue(':company_email', $this->company_email, PDO::PARAM_STR);
+
+			$stmt->bindValue(':agent_email', $this->agent_email, PDO::PARAM_STR);
+
+			$stmt->bindValue(':password', $encript_password, PDO::PARAM_STR);
+
+			if ($stmt->execute()) {
+
+				return true;
+
+			} else {
+
+				$this->errors[] = 'your account already register';
+
+				return false;
+			}
 		}
 
 		return false;
+	}
+
+	public function saveAccount() {
+
+		$sql = 'INSERT INTO account ( id, access_token, last_login, account_status,	wallet_amount )
+             VALUES ( :id, :access_token, :last_login, :account_status,	:wallet_amount )';
+
+		$stmt = $this->db->prepare($sql);
+
+		$encript_data = date('d-m-Y') . $this->phone;
+
+		$access_token = hash('sha256', $encript_data);
+
+		$stmt->bindValue(':id', $this->id, PDO::PARAM_STR);
+		$stmt->bindValue(':access_token', $access_token, PDO::PARAM_STR);
+		$stmt->bindValue(':last_login', null, PDO::PARAM_STR);
+		$stmt->bindValue(':account_status', 1, PDO::PARAM_STR);
+		$stmt->bindValue(':wallet_amount', 0, PDO::PARAM_STR);
+
+		return $stmt->execute();
 	}
 
 	private function loginValidate() {
@@ -100,7 +135,7 @@ class Company {
 		}
 	}
 
-	public function performLogin($db) {
+	private function performLogin() {
 
 		$this->loginValidate();
 
@@ -108,7 +143,7 @@ class Company {
 
 			$sql = "SELECT * FROM  company WHERE phone = :phone ";
 
-			$stmt = $db->prepare($sql);
+			$stmt = $this->db->prepare($sql);
 
 			$stmt->bindValue(':phone', $this->phone, PDO::PARAM_STR);
 
@@ -118,6 +153,7 @@ class Company {
 
 			$result = $stmt->fetch();
 
+			$this->id = $result['id'];
 			return password_verify($this->password, $result['password']);
 		}
 
@@ -125,7 +161,31 @@ class Company {
 
 	}
 
-	function makeTransation($db) {
+	public function loginCredential() {
+		if ($this->performLogin()) {
+
+			$sql = "SELECT access_token FROM  account WHERE id = :id ";
+
+			$stmt = $this->db->prepare($sql);
+
+			$stmt->bindValue(':id', $this->id, PDO::PARAM_STR);
+
+			$stmt->execute();
+
+			$stmt->setFetchMode(PDO::FETCH_ASSOC);
+
+			$result = $stmt->fetch();
+
+			$this->access_token = $result['access_token'];
+
+			if (empty($this->access_token)) {
+				return false;
+			}
+			return true;
+		}
+	}
+
+	function makeTransation() {
 		$this->transationValidate();
 
 		if (empty($this->errors)) {
@@ -175,6 +235,6 @@ class Company {
 	}
 
 	function addCreditAmount() {
-
+		$sql = 'UPDATE account SET amount = amount + :amount WHERE id = :company_id';
 	}
 }

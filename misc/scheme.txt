@@ -1,0 +1,27 @@
+++++++++++++++++++++++++++++++++
+++++++++++table route+++++++++++
+++++++++++++++++++++++++++++++++
+
+company :{
+
+	id 	(generated using phone with md5 hash) (fk)
+~	company_name 	
+~	agent_name 	
+~	agent_nrc 	
+~	agent_address 	
+~	company_address 	
+~	phone 	
+~	company_email 	
+~	agent_email 
+~	password (store using [password hash function ])
+}
+	
+account :{
+	
+	 id (fk)
+	 access_token (generate using sha256 with length 64 use date and phone number)
+	 last_login 
+	 account_status	[0 is panding , 1 is active , 2 is bunn]
+	 wallet_amount [ defult is 0 ]
+
+}
