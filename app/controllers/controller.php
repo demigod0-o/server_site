@@ -8,16 +8,12 @@ class controller
 {
 	protected $c;
 
-	public $response_message;
+	protected $response_message;
+
+	protected $status_code;
 	
 	function __construct(ContainerInterface $container)
 	{
 		$this->c = $container;
-
-	}
-
-
-	function jsonResponse(){
-	
 	}
 }
