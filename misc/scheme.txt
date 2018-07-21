@@ -7,8 +7,7 @@ company :{
 	id 	(generated using phone with md5 hash) (fk)
 ~	company_name 	
 ~	agent_name 	
-~	agent_nrc 	
-~	agent_address 	
+~	agent_nrc 	 	
 ~	company_address 	
 ~	phone 	
 ~	company_email 	
@@ -34,4 +33,16 @@ transaction_record :{
 ~	target_phone
 ~   target_operator  (1 is mpt,2 is ooredoo,3 is telenor,4 is mytel);	
 	datetime 
+}
+
+
+store : {
+
+	id 	(generated using phone with md5 hash) (fk)
+~	store_name 	 	 	
+~	store_address 	 	
+~	phone 	
+~	store_email 	
+~	password (store using [password hash function ])
+
 }

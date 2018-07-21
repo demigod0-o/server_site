@@ -20,7 +20,7 @@ class CompanyLogin extends Company {
 
 		if (empty($this->errors)) {
 
-			$sql = "SELECT * FROM  company WHERE phone = :phone ";
+			$sql = "SELECT * FROM  info WHERE phone = :phone ";
 
 			$stmt = $this->db->prepare($sql);
 
@@ -33,6 +33,7 @@ class CompanyLogin extends Company {
 			$result = $stmt->fetch();
 
 			$this->id = $result['id'];
+
 			return password_verify($this->password, $result['password']);
 		}
 

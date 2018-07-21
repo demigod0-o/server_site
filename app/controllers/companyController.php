@@ -10,7 +10,7 @@ class companyController extends controller {
 
 	function register($request, $response) {
 
-		$company = new CompanyRegister($request->getParsedBody(), $this->c->db);
+		$company = new CompanyRegister($request->getParsedBody(), $this->c->company_db);
 
 		if ($company->save()) {
 
@@ -23,12 +23,12 @@ class companyController extends controller {
 			}
 
 		} else {
+
 			$this->response_message = [
 				'message' => $company->errors,
 				'error' => true,
 			];
 			$this->status_code = 406;
-
 		}
 
 		return $response->withJson($this->response_message, $this->status_code);
@@ -36,7 +36,7 @@ class companyController extends controller {
 
 	function login($request, $response) {
 
-		$company = new CompanyLogin($request->getParsedBody(), $this->c->db);
+		$company = new CompanyLogin($request->getParsedBody(), $this->c->company_db);
 
 		if ($company->loginCredential()) {
 
@@ -53,7 +53,7 @@ class companyController extends controller {
 				'message' => 'login failed',
 				'error' => true,
 			];
-			$this->status_code = 401;
+			$this->status_code = 200;
 		}
 
 		return $response->withJson($this->response_message, $this->status_code);
@@ -63,7 +63,7 @@ class companyController extends controller {
 	/* This transation method is used for transfer money from company */
 	function transaction($request, $response) {
 
-		$company = new CompanyTransaction($request->getParsedBody(), $this->c->db);
+		$company = new CompanyTransaction($request->getParsedBody(), $this->c->company_db);
 
 		if ($company->makeTransation()) {
 

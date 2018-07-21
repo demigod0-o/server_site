@@ -5,11 +5,11 @@ use PDO;
 class CompanyRegister extends Company {
 
 	function validate() {
+
 		if ($this->company_name != '' and $this->agent_name != '' and
-			$this->agent_nrc != '' and $this->agent_address != '' and
-			$this->company_address != '' and $this->phone != '' and
-			$this->company_email != '' and $this->agent_email != '' and
-			$this->password != '') {
+			$this->agent_nrc != '' and $this->company_address != '' and
+			$this->phone != '' and $this->company_email != '' and
+			$this->agent_email != '' and $this->password != '') {
 
 			if (filter_var($this->company_email, FILTER_VALIDATE_EMAIL) === false) {
 				$this->errors[] = 'company email is invalid !';
@@ -37,10 +37,9 @@ class CompanyRegister extends Company {
 
 			$this->id = md5($this->phone);
 
-			$sql = 'INSERT INTO company ( id, company_name, agent_name,agent_nrc, agent_address,
+			$sql = 'INSERT INTO info ( id, company_name, agent_name,agent_nrc,
 				  company_address, phone,company_email, agent_email, password )
-             	VALUES ( :id, :company_name, :agent_name, :agent_nrc, :agent_address,
-				  :company_address, :phone, :company_email, :agent_email, :password )';
+             	VALUES ( :id, :company_name, :agent_name, :agent_nrc, :company_address, :phone, :company_email, :agent_email, :password )';
 
 			$stmt = $this->db->prepare($sql);
 
@@ -51,8 +50,6 @@ class CompanyRegister extends Company {
 			$stmt->bindValue(':agent_name', $this->agent_name, PDO::PARAM_STR);
 
 			$stmt->bindValue(':agent_nrc', $this->agent_nrc, PDO::PARAM_STR);
-
-			$stmt->bindValue(':agent_address', $this->agent_address, PDO::PARAM_STR);
 
 			$stmt->bindValue(':company_address', $this->company_address, PDO::PARAM_STR);
 
